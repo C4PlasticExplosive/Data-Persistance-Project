@@ -10,12 +10,12 @@ public class GameManager : MonoBehaviour
     public string highScoreName;
     public TMP_InputField nameEntry;
     public static GameManager Instance;
-    public int highScore = 0;
+    public int highScore;
     // Start is called before the first frame update
     void Awake()
     {
-        playername = "";
 
+        LoadHighScore();
 
         if (Instance != null)
         {
@@ -30,16 +30,22 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        playername = nameEntry.text;
-        Debug.Log(playername);
+        
+        Debug.Log(highScore);
     }
     public void StartGame()
     {
+        UpdateName();
         if (playername != "")
         {
             SceneManager.LoadScene(1);
         }
         
+    }
+
+    public void UpdateName()
+    {
+        playername = nameEntry.text;
     }
 
     [System.Serializable]
@@ -48,12 +54,27 @@ public class GameManager : MonoBehaviour
         public string highScorename;
         public int highScore;
     }
-    public void SaveColor()
+    public void UpdateHighScore()
     {
        PlayerSave data = new PlayerSave();
-        data.highScorename = playername;
+        data.highScorename = highScoreName;
         data.highScore = highScore;
 
+        string json = JsonUtility.ToJson(data);
 
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    public void LoadHighScore()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            PlayerSave data = JsonUtility.FromJson<PlayerSave>(json);
+
+            highScoreName = data.highScorename;
+            highScore = data.highScore;
+        }
     }
 }
